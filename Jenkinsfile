@@ -28,7 +28,7 @@ pipeline {
                     sh "docker rm -f myapp_container || true"
 
                     echo "Running new container..."
-                    sh "docker run -d --name myapp_container -p 8082:5050 ${DOCKER_IMAGE}"
+                    sh "docker run -d --name myapp_container -p 5050:5050 ${DOCKER_IMAGE}"
 
                     echo "Application is now running at http://<your-server-ip>:8082"
                 }
