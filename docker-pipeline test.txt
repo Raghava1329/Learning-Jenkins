@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "Docker-username/image-name:version"
+        CONTAINER_NAME = "Name any for contaier identificaton"
+    }
+
+    stages {
+        stage('Pull and Run') {
+            steps {
+                script {
+                    // Pull the latest image
+                    sh "docker pull ${IMAGE_NAME}"
+
+                    // Check if container is running
+                    def containerExists = sh(script: "docker ps -a --format '{{.Names}}' | grep -w ${CONTAINER_NAME} || true", returnStdout: true).trim()
+
+                    if (containerExists) {
+                        echo "Container exists, stopping and removing..."
+                        sh "docker stop ${CONTAINER_NAME} || true"
+                        sh "docker rm ${CONTAINER_NAME} || true"
+                    }
+
+                    // Run the container with a fixed name
+                    sh """
+                    docker run -d --name ${CONTAINER_NAME} -p 8080:8080 ${IMAGE_NAME}
+                    """
+                    echo "Container is up and running."
+                }
+            }
+        }
+    }
+}
+
+////////////// or
+
+
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'your-dockerhub-username/your-image:tag'
+    }
+
+    stages {
+        stage('Pull and Run') {
+            steps {
+                script {
+                    def image = docker.image(env.DOCKER_IMAGE)
+                    image.pull()
+                    image.inside {
+                        sh 'echo "Inside public image"'
+                        // your commands here
+                    }
+                }                            //After the commands execution the container will be deleted
+            }
+        }
+    }
+}
